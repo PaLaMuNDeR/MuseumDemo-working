@@ -4,5 +4,8 @@
     <string name="app_name">Museum Demo</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="AllDemos">All Demos</string>
+    <string name="Beacon">Beacon</string>
+    <string name="distancedemo">Distance Demo</string>
 
 </resources>

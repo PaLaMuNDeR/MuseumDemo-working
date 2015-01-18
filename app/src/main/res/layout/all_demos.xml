@@ -13,7 +13,7 @@
         android:background="?attr/colorPrimary"/>
 
     <com.gc.materialdesign.views.ButtonRectangle
-        android:id="@+id/button_beacon"
+        android:id="@+id/button_demos"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="#1E88E5"

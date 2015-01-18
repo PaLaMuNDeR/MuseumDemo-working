@@ -1,0 +1,4 @@
+E:
+cd "E:\Android SDK\platform-tools"
+adb kill-server
+adb start-server

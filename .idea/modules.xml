@@ -2,6 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/Beacon/Beacon.iml" filepath="$PROJECT_DIR$/Beacon/Beacon.iml" />
       <module fileurl="file://$PROJECT_DIR$/MuseumDemo.iml" filepath="$PROJECT_DIR$/MuseumDemo.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>

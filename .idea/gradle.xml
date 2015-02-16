@@ -9,7 +9,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/Beacon" />
-            <option value="$PROJECT_DIR$/app" />
+            <option value="$PROJECT_DIR$/metaioSDK_601" />
           </set>
         </option>
       </GradleProjectSettings>

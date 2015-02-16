@@ -3,8 +3,8 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/Beacon/Beacon.iml" filepath="$PROJECT_DIR$/Beacon/Beacon.iml" />
-      <module fileurl="file://$PROJECT_DIR$/MuseumDemo.iml" filepath="$PROJECT_DIR$/MuseumDemo.iml" />
-      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/MuseumDemo Modified.iml" filepath="$PROJECT_DIR$/MuseumDemo Modified.iml" />
+      <module fileurl="file://$PROJECT_DIR$/metaioSDK_601/metaioSDK_601.iml" filepath="$PROJECT_DIR$/metaioSDK_601/metaioSDK_601.iml" />
     </modules>
   </component>
 </project>

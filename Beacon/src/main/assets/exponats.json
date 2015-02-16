@@ -1,0 +1,14 @@
+{"exponats":
+ [
+    {
+        "name": "Mona Lisa",
+        "image": "exponat_1_image",
+        "beaconMac": "E3:82:A7:F7:DD:E5"
+    },
+    {
+            "name": "Virtual Room",
+            "image": "virtual_room",
+            "beaconMac": "FD:E4:DA:CD:3C:1E"
+    }
+ ]
+}

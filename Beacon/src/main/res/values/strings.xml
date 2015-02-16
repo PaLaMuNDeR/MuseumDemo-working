@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Museums Demo</string>
+    <string name="scanning">Looking for close exponats...</string>
+    <string name="welcome">Welcome to Museum Demo</string>
+    <string name="exponat_1_mac">E3:82:A7:F7:DD:E5</string>
+</resources>

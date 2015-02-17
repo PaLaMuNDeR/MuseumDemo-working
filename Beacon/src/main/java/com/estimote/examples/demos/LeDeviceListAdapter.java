@@ -130,6 +130,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
                 holder.macImageResource = image_value;
                 int image_source = mContext.getResources().getIdentifier("com.estimote.examples.demos:drawable/" + image_value, null, null);
                 holder.macImageView.setImageResource(image_source);
+                holder.macContinueBool=Boolean.TRUE;
                 break;
             }
             //if(!beacon.getMacAddress().equals(b_mac_db))
@@ -139,6 +140,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
                         Utils.computeAccuracy(beacon)));
                 int image_source = mContext.getResources().getIdentifier("com.estimote.examples.demos:drawable/beacon_gray", null, null);
                 holder.macImageView.setImageResource(image_source);
+                holder.macContinueBool=Boolean.FALSE;
             }
 
 
@@ -187,7 +189,11 @@ db.close();
         Integer exponat_id = holder.macId;
         return exponat_id;
     }
-
+    public Boolean getContinueBool(View view){
+        ViewHolder holder = (ViewHolder) view.getTag();
+        Boolean continueBool = holder.macContinueBool;
+        return continueBool;
+    }
 
 
     private View inflateIfRequired(View view, int position, ViewGroup parent) {
@@ -202,6 +208,7 @@ db.close();
         final TextView macTextView;
         final ImageView macImageView;
         public String macImageResource;
+        public Boolean macContinueBool;
         public int macId;
 
         ViewHolder(View view) {
@@ -209,6 +216,7 @@ db.close();
             macImageView = (ImageView) view.findViewWithTag("image");
             macId = 0;
         }
+
     }
 
     void Parser() {

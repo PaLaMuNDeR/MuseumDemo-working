@@ -5,7 +5,7 @@
         "name": "Mona Lisa",
         "image": "exponat_1_image",
         "beaconMac": "E3:82:A7:F7:DD:E5",
-        "trackingData": "TrackingData_MarkerlessFast",
+        "trackingData": "TrackingData_MarkerlessFast.xml",
         "target": "mona_target",
         "type": "Video",
         "model": "mona_rotated.3gp"
@@ -13,8 +13,8 @@
     {
         "name": "Virtual Room",
         "image": "virtual_room",
-        "beaconMac": "FD:E4:DA:CD:3C:1E",
-        "trackingData": "TrackingData_MarkerlessFast",
+        "beaconMac": "CE:94:FB:D0:DB:16",
+        "trackingData": "TrackingData_MarkerlessFast.xml",
         "target": "mona_target",
         "type": "3D",
         "model": "stuhl.obj"

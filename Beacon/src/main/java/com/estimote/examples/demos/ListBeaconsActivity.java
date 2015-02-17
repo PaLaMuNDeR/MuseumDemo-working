@@ -279,19 +279,27 @@ public class ListBeaconsActivity extends Activity  {
                 //try {
                 //Class<?> clazz = Class.forName(getIntent().getStringExtra(EXTRAS_TARGET_ACTIVITY));
                 //Intent intent = new Intent(ListBeaconsActivity.this, clazz);
-                Intent intent = new Intent(ListBeaconsActivity.this, DistanceBeaconActivity.class);
-                intent.putExtra(EXTRAS_BEACON, adapter.getItem(position));
-                SharedPreferences sp = PreferenceManager
-                        .getDefaultSharedPreferences(ListBeaconsActivity.this);
-                SharedPreferences.Editor edit = sp.edit();
-                Log.d("image",adapter.getImage(view));
-                edit.putString("image_resource", adapter.getImage(view));
-                edit.putInt("exponat_id", adapter.getExponatId(view));
-                Log.d("database","exponat_id="+adapter.getExponatId(view));
-              //  edit.putString("name_resource", adapter.getName(view));
-                edit.commit();
+               if(adapter.getContinueBool(view)) {
+                   Intent intent = new Intent(ListBeaconsActivity.this, DistanceBeaconActivity.class);
+                   intent.putExtra(EXTRAS_BEACON, adapter.getItem(position));
+                   SharedPreferences sp = PreferenceManager
+                           .getDefaultSharedPreferences(ListBeaconsActivity.this);
+                   SharedPreferences.Editor edit = sp.edit();
+                   Log.d("image", adapter.getImage(view));
+                   edit.putString("image_resource", adapter.getImage(view));
+                   edit.putInt("exponat_id", adapter.getExponatId(view));
+                   Log.d("database", "exponat_id=" + adapter.getExponatId(view));
+                   //  edit.putString("name_resource", adapter.getName(view));
+                   edit.commit();
 
-                startActivity(intent);
+                   startActivity(intent);
+               }
+                else{
+
+                   showToast("This device is not registered, please choose another.");
+
+               }
+
 //          } catch (ClassNotFoundException e) {
 //            Log.e(TAG, "Finding class by name failed", e);
 //          }

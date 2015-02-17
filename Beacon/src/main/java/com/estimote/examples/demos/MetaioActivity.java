@@ -1,6 +1,8 @@
 package com.estimote.examples.demos;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -20,6 +22,7 @@ import com.metaio.tools.io.AssetsManager;
 
 
 import java.io.File;
+import java.util.List;
 
 /**
  * Shows all available demos.
@@ -28,7 +31,7 @@ import java.io.File;
 public class MetaioActivity extends ARViewActivity {
 
     //Geometries for the models
-    private IGeometry mChair;
+    private IGeometry mObject;
     private IGeometry mMoviePlane;
 
     //CallbackHandler
@@ -38,17 +41,43 @@ public class MetaioActivity extends ARViewActivity {
     //Handles gestures
     private int mGestureMask;
     private GestureHandlerAndroid mGestureHandler;
+    private String name_resource;
+    private String trackingData;
+    //Possible values for type are "3D" or "Video"
+    private String type;
+    private String target;
+    private String model;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        // extract all the assets
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(MetaioActivity.this);
+        int exponat_id = sp.getInt("exponat_id",0);
+        DatabaseHandler db = new DatabaseHandler(MetaioActivity.this);
+        List<Exponat> exponats = db.getAllExponats();
+        try {
+            for (Exponat ex : exponats){
+                if (exponat_id==ex.getId()){
+                    trackingData = ex.getTrackingData();
+                    target = ex.getTarget();
+                    type = ex.getType();
+                    model = ex.getModel();
+                    break;
+                }
+            }
+        }
+        catch (Exception e){
+            Log.e("Error","Error when extracting from db the assets");
+        }
+        Log.d("model","TrackingData="+trackingData + " Target=" + target + " Type=" + model + " Model");
         mMoviePlane = null;
+        mObject = null;
         mCallbackHandler = new MetaioSDKCallbackHandler();
         //Approve all types of gestures for the models
         mGestureMask = GestureHandler.GESTURE_ALL;
         mGestureHandler = new GestureHandlerAndroid(metaioSDK, mGestureMask);
-        mChair = null;
     }
 
     @Override
@@ -72,51 +101,62 @@ public class MetaioActivity extends ARViewActivity {
 
     @Override
     protected void loadContents() {
-        // extract all the assets
 
-        String trackingConfigFile = AssetsManager.getAssetPath(getApplicationContext(), "TrackingData_MarkerlessFast.xml");
+
+        String trackingConfigFile = AssetsManager.getAssetPath(getApplicationContext(), trackingData);
 
         Log.v("Assets", "Load " + trackingConfigFile);
         // Assigning tracking configuration
         boolean result1 = metaioSDK.setTrackingConfiguration(trackingConfigFile);
         MetaioDebug.log("Tracking data loaded: " + result1);
 
-        // Load all the geometries. First - Model
-        // Load the Chair (Stuhl)
+
+
+        // Load all the geometries
+            // Load the Chair (Stuhl)
+        if(type.equals("3D")) {
+
         File filepath =
-                AssetsManager.getAssetPathAsFile(getApplicationContext(),
-                        "stuhl.obj");
-        if (filepath != null) {
-            mChair = metaioSDK.createGeometry(filepath);
+                    AssetsManager.getAssetPathAsFile(getApplicationContext(),
+                            model);
 
-            if (mChair != null) {
-                //Sets the scale of the chair and its geometries location and rotation
-                mChair.setScale(50f);
-                mChair.setTranslation(new Vector3d(0f, 0f, 0f));
-                mChair.setRotation(new Rotation((float) Math.PI / 2f, 0.5f, 0f));
+            if (filepath != null) {
+                mObject = metaioSDK.createGeometry(filepath);
 
-                mGestureHandler.addObject(mChair, 2);
-            } else {
-                MetaioDebug.log(Log.ERROR, "Error loading geometry: " + filepath);
+                if (mObject != null) {
+                    //Sets the scale of the chair and its geometries location and rotation
+                    mObject.setScale(50f);
+                    mObject.setTranslation(new Vector3d(0f, 0f, 0f));
+                    mObject.setRotation(new Rotation((float) Math.PI / 2f, 0.5f, 0f));
+
+                    mGestureHandler.addObject(mObject, 2);
+                } else {
+                    MetaioDebug.log(Log.ERROR, "Error loading geometry: " + filepath);
+                }
             }
         }
-
-        // Loading movie
-        final File moviePath =
-                AssetsManager.getAssetPathAsFile(getApplicationContext(), "mona_rotated.3gp");
-        if (moviePath != null) {
-            mMoviePlane = metaioSDK.createGeometryFromMovie(moviePath, false);
-            if (mMoviePlane != null) {
-                mMoviePlane.setScale(2.0f);
-                mMoviePlane.setRotation(new Rotation(0f, 0f, (float) -Math.PI / 2));
-                MetaioDebug.log("Loaded geometry " + moviePath);
-            } else {
-                MetaioDebug.log(Log.ERROR, "Error loading geometry: " + moviePath);
-            }
+if(type.equals("Video")) {
+    // Loading movie
+    final File moviePath =
+            AssetsManager.getAssetPathAsFile(getApplicationContext(), model);
+    if (moviePath != null) {
+        mMoviePlane = metaioSDK.createGeometryFromMovie(moviePath, false);
+        if (mMoviePlane != null) {
+            mMoviePlane.setScale(2.0f);
+            mMoviePlane.setRotation(new Rotation(0f, 0f, (float) -Math.PI / 2));
+            MetaioDebug.log("Loaded geometry " + moviePath);
+        } else {
+            MetaioDebug.log(Log.ERROR, "Error loading geometry: " + moviePath);
         }
-
+    }
+}
         //TODO assign this to the Beacon
-        setActiveModel(3);
+        if(type.equals("3D")) {
+                setActiveModel(0);
+        }
+        if(type.equals("Video")){
+            setActiveModel(1);
+        }
     }
 
     //Handles what happens when a model is touched
@@ -137,9 +177,10 @@ public class MetaioActivity extends ARViewActivity {
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         super.onTouch(v, event);
+        if(type.equals("3D")) {
 
-        mGestureHandler.onTouch(v, event);
-
+            mGestureHandler.onTouch(v, event);
+        }
         return true;
     }
 
@@ -153,11 +194,12 @@ public class MetaioActivity extends ARViewActivity {
     private void setActiveModel(int modelIndex) {
         mSelectedModel = modelIndex;
 
-        mChair.setVisible(modelIndex == 0);
-        mMoviePlane.setVisible(modelIndex == 3);
+        if(type.equals("3D")) {
+            mObject.setVisible(modelIndex == 0);
+        }
+        if(type.equals("Video")) {
 
-        if (modelIndex != 3) {
-            mMoviePlane.stopMovieTexture();
+            mMoviePlane.setVisible(modelIndex == 1);
         }
 
         // Start or pause movie according to tracking state
@@ -179,6 +221,7 @@ public class MetaioActivity extends ARViewActivity {
         @Override
         public void onTrackingEvent(TrackingValuesVector trackingValues) {
             super.onTrackingEvent(trackingValues);
+            if(type.equals("Video")) {
 
             // Play movie if the movie button was selected and we're currently tracking.
             if (trackingValues.isEmpty() || !trackingValues.get(0).isTrackingState()) {
@@ -186,10 +229,11 @@ public class MetaioActivity extends ARViewActivity {
                     mMoviePlane.pauseMovieTexture();
                 }
             } else {
-                if (mMoviePlane != null && mSelectedModel == 3) {
+                if (mMoviePlane != null && mSelectedModel == 1) {
                     mMoviePlane.startMovieTexture(true);
 
                 }
+            }
             }
         }
     }

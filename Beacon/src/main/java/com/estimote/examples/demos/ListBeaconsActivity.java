@@ -61,10 +61,17 @@ public class ListBeaconsActivity extends Activity  {
 
     private ArrayList<HashMap<String, String>> mExponatsList;
     private JSONArray mExponats = null;
+    private HashMap<String,Integer> mVersion;
+
 
     private static final String TAG_NAME = "name";
     private static final String TAG_IMAGE = "image";
     private static final String TAG_BEACON_MAC = "beaconMac";
+    private static final String TAG_TRACKING_DATA = "trackingData";
+    private static final String TAG_TARGET = "target";
+    private static final String TAG_TYPE = "type";
+    private static final String TAG_MODEL = "model";
+    SharedPreferences prefs = null;
 
 
     @Override
@@ -73,9 +80,13 @@ public class ListBeaconsActivity extends Activity  {
         setContentView(R.layout.main);
         //getActionBar().setDisplayHomeAsUpEnabled(true);
 
+         prefs = getSharedPreferences("com.mycompany.myAppName", MODE_PRIVATE);
+
+
         // extract all the assets
         mTask = new AssetsExtracter();
         mTask.execute(0);
+
 
         // Configure device list.
         adapter = new LeDeviceListAdapter(ListBeaconsActivity.this);
@@ -118,7 +129,19 @@ public class ListBeaconsActivity extends Activity  {
         refreshItem.setActionView(R.layout.actionbar_indeterminate_progress);
         return true;
     }
+    @Override
+    protected void onResume() {
+        super.onResume();
 
+        if (prefs.getBoolean("firstrun", true)) {
+            // Do first run stuff here then set 'firstrun' as false
+            // using the following line to edit/commit prefs
+            Log.d("run","first run");
+
+
+            prefs.edit().putBoolean("firstrun", false).commit();
+        }
+    }
  /* @Override
   public boolean onOptionsItemSelected(MenuItem item) {
     if (item.getItemId() == android.R.id.home) {
@@ -127,6 +150,7 @@ public class ListBeaconsActivity extends Activity  {
     }
     return super.onOptionsItemSelected(item);
   }*/
+
 
     @Override
     protected void onDestroy() {
@@ -184,13 +208,12 @@ public class ListBeaconsActivity extends Activity  {
                 MetaioDebug.printStackTrace(Log.ERROR, e);
                 return false;
             }
-            //TODO remove
-          /*  try {
-                Parser();
+            try {
+                JSONParserToDB();
             } catch (Exception e) {
                 Log.e("Error with the JSON Parser",
                         "Error when parsing the JSON, may be it is not formatted properly.");
-            }*/
+            }
             return true;
         }
 
@@ -261,10 +284,13 @@ public class ListBeaconsActivity extends Activity  {
                 SharedPreferences sp = PreferenceManager
                         .getDefaultSharedPreferences(ListBeaconsActivity.this);
                 SharedPreferences.Editor edit = sp.edit();
+                Log.d("image",adapter.getImage(view));
                 edit.putString("image_resource", adapter.getImage(view));
+                edit.putInt("exponat_id", adapter.getExponatId(view));
+                Log.d("database","exponat_id="+adapter.getExponatId(view));
               //  edit.putString("name_resource", adapter.getName(view));
                 edit.commit();
-                Log.d("image",adapter.getImage(view));
+
                 startActivity(intent);
 //          } catch (ClassNotFoundException e) {
 //            Log.e(TAG, "Finding class by name failed", e);
@@ -273,6 +299,139 @@ public class ListBeaconsActivity extends Activity  {
             }
         };
     }
+
+    private void JSONParserToDB(){
+        DatabaseHandler db = new DatabaseHandler(ListBeaconsActivity.this);
+        // Hashmap for ListView
+
+        SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(ListBeaconsActivity.this);
+
+        //       SharedPreferences.Editor edit = sp.edit();
+        //     edit.putInt("dbVersion",);
+
+       /* Log.d("Database","Dropping...");
+        int oldv = sp.getInt("dbVersion",1);
+        int newv = oldv+1;
+        sp.edit().putInt("dbVersion",newv);
+
+        db.onUpgrade(db.getWritableDatabase(),1,2);
+
+        Log.d("Database","Creating new db...");*/
+
+
+        mExponatsList = new ArrayList<HashMap<String, String>>();
+        //   mVersion = new HashMap<String, Integer>();
+
+        //  ArrayList<HashMap<String, String>> exponatList = new ArrayList<HashMap<String, String>>();
+        String string = loadJSONFromAsset();
+        try {
+
+            JSONObject json = new JSONObject(string);
+
+            int version = json.getInt("version");
+
+
+                Log.d("Database","Dropping database...");
+                db.onUpgrade(db.getWritableDatabase(),db.getDATABASE_VERSION(),version);
+                Log.d("Database","Creating database...");
+
+                mExponats = json.getJSONArray("exponats");
+                for (int i = 0; i < mExponats.length(); i++) {
+                JSONObject c = mExponats.getJSONObject(i);
+
+                // gets the content of each tag
+                String name = c.getString(TAG_NAME);
+                String image = c.getString(TAG_IMAGE);
+                String beaconMac = c.getString(TAG_BEACON_MAC);
+                String trackingData = c.getString(TAG_TRACKING_DATA);
+                String target = c.getString(TAG_TARGET);
+                String type = c.getString(TAG_TYPE);
+                String model = c.getString(TAG_MODEL);
+
+
+                Log.d("Database", "Inserting...");
+                db.addExponat(new Exponat(name, image, beaconMac, trackingData, target, type, model));
+                // creating new HashMap
+                HashMap<String, String> map = new HashMap<String, String>();
+
+                // map.put(TAG_POI_ID, poi_id);
+                map.put(TAG_NAME, name);
+                map.put(TAG_IMAGE, image);
+                map.put(TAG_BEACON_MAC, beaconMac);
+                map.put(TAG_TRACKING_DATA, trackingData);
+                map.put(TAG_TARGET, target);
+                map.put(TAG_TYPE, type);
+                map.put(TAG_MODEL, model);
+
+                // adding HashList to ArrayList
+                mExponatsList.add(map);
+
+                // annndddd, our JSON data is up to date same with our array
+                // list
+                //TODO Remove
+                Log.d("hashmap", "One more added");
+
+
+            }
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+
+        }
+
+
+
+        Log.d("hashmap", mExponatsList.toString());
+// Reading all contacts
+        Log.d("Database", "Reading all exponats..");
+        List<Exponat> exponats = db.getAllExponats();
+        for (Exponat ex : exponats) {
+            String log = "Id: " + ex.getId() + " ,Name: " + ex.getName() + " ,MAC: " + ex.getBeaconMac();
+            // Writing Exponats to log
+            Log.d("Database ", log);
+            db.close();
+        }
+
+
+
+// now we save the strings for the poi in the sharedresources
+        // to pass it to the adapter
+      /*  SharedPreferences sp = PreferenceManager
+                .getDefaultSharedPreferences(mContext.this);
+        SharedPreferences.Editor edit = sp.edit();
+        edit.putString("jsonString", string);
+*/
+
+    }
+
+    public String loadJSONFromAsset() {
+        String json = null;
+        try {
+
+            InputStream is = getAssets().open("exponats.json");
+
+            int size = is.available();
+
+            byte[] buffer = new byte[size];
+
+            is.read(buffer);
+
+            is.close();
+
+            json = new String(buffer, "UTF-8");
+
+            //TODO remove
+            Log.d("Hashmap", "I read it");
+        } catch (IOException ex) {
+            ex.printStackTrace();
+            return null;
+        }
+        return json;
+    }
+
+
+
 
 
 

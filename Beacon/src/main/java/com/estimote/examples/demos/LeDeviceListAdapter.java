@@ -4,6 +4,7 @@ import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.BitmapFactory;
 import android.preference.PreferenceManager;
 import android.util.Log;
 import android.util.Xml;
@@ -49,11 +50,7 @@ public class LeDeviceListAdapter extends BaseAdapter {
 
     private ArrayList<Beacon> beacons;
     private LayoutInflater inflater;
-    private String exponat1_mac = "=";
     Context mContext;
-    XmlPullParser parser = Xml.newPullParser();
-    private static String mBeaconImage = "";
-    public String mExponatsL;
 
     private ArrayList<HashMap<String, String>> mExponatsList;
     private JSONArray mExponats = null;
@@ -61,7 +58,6 @@ public class LeDeviceListAdapter extends BaseAdapter {
     private static final String TAG_NAME = "name";
     private static final String TAG_IMAGE = "image";
     private static final String TAG_BEACON_MAC = "beaconMac";
-    private  String jsonString = "";
     public String image_value;
 
     public LeDeviceListAdapter(Context context) {
@@ -97,6 +93,8 @@ public class LeDeviceListAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View view, ViewGroup parent) {
         view = inflateIfRequired(view, position, parent);
+        DatabaseHandler db = new DatabaseHandler(mContext);
+
         bind(getItem(position), view);
 
         return view;
@@ -105,6 +103,8 @@ public class LeDeviceListAdapter extends BaseAdapter {
     private void bind(Beacon beacon, View view) {
 
         ViewHolder holder = (ViewHolder) view.getTag();
+        DatabaseHandler db = new DatabaseHandler(mContext);
+        List<Exponat> exponats = db.getAllExponats();
 
 //    mbeaconMac = "";
         //mContext.getString(R.string.exponat_1_name);
@@ -112,6 +112,40 @@ public class LeDeviceListAdapter extends BaseAdapter {
 /*
     while(beacon.getMacAddress().equals(mbeaconMac))
 */
+
+
+        for (Exponat ex : exponats) {
+           // String log = "Id: " + ex.getId() + " ,Name: " + ex.getName() + " ,MAC: " + ex.getBeaconMac();
+            // Writing Exponats to log
+            //Log.d("Database ", log);
+            String b_mac_db = ex.getBeaconMac();
+
+
+            if(beacon.getMacAddress().equals(b_mac_db)){
+                String name_value = ex.getName();
+                holder.macTextView.setText(String.format("%s (%.2fm)", name_value, Utils.computeAccuracy(beacon)));
+                int id = ex.getId();
+                holder.macId = id;
+                image_value = ex.getImage();
+                holder.macImageResource = image_value;
+                int image_source = mContext.getResources().getIdentifier("com.estimote.examples.demos:drawable/" + image_value, null, null);
+                holder.macImageView.setImageResource(image_source);
+                break;
+            }
+            //if(!beacon.getMacAddress().equals(b_mac_db))
+            else{
+                holder.macTextView.setText(String.format("%s (%.2fm)",
+                        "MAC:" + beacon.getMacAddress(),
+                        Utils.computeAccuracy(beacon)));
+                int image_source = mContext.getResources().getIdentifier("com.estimote.examples.demos:drawable/beacon_gray", null, null);
+                holder.macImageView.setImageResource(image_source);
+            }
+
+
+            }
+db.close();
+
+/*
 
 
             for (HashMap<String, String> hashMap : mExponatsList) {
@@ -135,10 +169,11 @@ public class LeDeviceListAdapter extends BaseAdapter {
 
                     }
                 }
+*/
 
 
 
-        }
+
     }
     public String getImage(View view){
         ViewHolder holder = (ViewHolder) view.getTag();
@@ -147,11 +182,11 @@ public class LeDeviceListAdapter extends BaseAdapter {
         return image_resource;
     }
 
-  /*  public String getName(View view){
+    public Integer getExponatId(View view){
         ViewHolder holder = (ViewHolder) view.getTag();
-        String resource_name = holder.macTextResource;
-        return resource_name;
-    }*/
+        Integer exponat_id = holder.macId;
+        return exponat_id;
+    }
 
 
 
@@ -167,12 +202,12 @@ public class LeDeviceListAdapter extends BaseAdapter {
         final TextView macTextView;
         final ImageView macImageView;
         public String macImageResource;
-        public String macTextResource;
+        public int macId;
 
         ViewHolder(View view) {
             macTextView = (TextView) view.findViewWithTag("mac");
             macImageView = (ImageView) view.findViewWithTag("image");
-            macTextResource = "Unknown";
+            macId = 0;
         }
     }
 

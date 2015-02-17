@@ -1,8 +1,6 @@
 package com.estimote.examples.demos;
 
-import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,25 +38,17 @@ public class MetaioActivity extends ARViewActivity {
     //Handles gestures
     private int mGestureMask;
     private GestureHandlerAndroid mGestureHandler;
-    private String name_resource;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-      /*  SharedPreferences sp = PreferenceManager
-                .getDefaultSharedPreferences(MetaioActivity.this);
-        name_resource = sp.getString("name_resource", "");
-        */
-        Log.d("image","name resource = " + name_resource);
-        mapAssets(name_resource);
-        //  Log.d("image",image_resource);
+
         mMoviePlane = null;
         mCallbackHandler = new MetaioSDKCallbackHandler();
         //Approve all types of gestures for the models
         mGestureMask = GestureHandler.GESTURE_ALL;
         mGestureHandler = new GestureHandlerAndroid(metaioSDK, mGestureMask);
         mChair = null;
-
     }
 
     @Override
@@ -79,9 +69,7 @@ public class MetaioActivity extends ARViewActivity {
         finish();
     }
 
-    private void mapAssets(String name){
 
-    }
     @Override
     protected void loadContents() {
         // extract all the assets
@@ -144,6 +132,8 @@ public class MetaioActivity extends ARViewActivity {
         }
 
     }
+
+    //Sem Tink
     @Override
     public boolean onTouch(View v, MotionEvent event) {
         super.onTouch(v, event);
